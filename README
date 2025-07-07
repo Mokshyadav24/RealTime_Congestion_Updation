@@ -1,0 +1,143 @@
+# Telecom Handover Simulation System
+
+A Dockerized, scalable simulation of mobile handovers among cell-tower nodes, storing recent data in ArangoDB and visualizing the handover graph. Includes automated data generation, data retention cleanup, and graph visualization.
+
+## Table of Contents
+
+- Project Overview  
+- Architecture  
+- Prerequisites  
+- Getting Started  
+  - 1. Clone Repository  
+  - 2. Configure Environment  
+  - 3. Build & Run with Docker Compose  
+- Components  
+  - Data Generator  
+  - ArangoDB Setup  
+  - Retention Cleanup Script  
+  - Graph Visualization  
+- Configuration  
+- Usage  
+- Extending the Simulation  
+- License  
+
+## Project Overview
+
+This project simulates mobile phone “handovers” as clients move between cell-tower nodes. It generates synthetic data every 30 seconds, stores the last 1 hour of events in ArangoDB, and provides a script to clean up older data. A visualization component builds a graph of handovers for analysis.
+
+## Architecture
+
+```
+┌──────────────────┐       ┌────────────────┐       ┌──────────────────┐
+│ Data Generator   │    ──────▶    │ ArangoDB       │──────▶│ Cleanup Service  │
+│ (Python Script)  │                  │ (Docker)       │         │ (Retention Job)  │
+└──────────────────┘       └────────────────┘       └──────────────────┘
+                                        │
+                                        ▼
+                               ┌──────────────────┐
+                               │ Graph Visualizer │
+                               │ (Python + <vis>) │
+                               └──────────────────┘
+```
+
+## Prerequisites
+
+- Docker & Docker Compose  
+- Python 3.8+  
+- `pip` packages: `pandas`, `openpyxl`, `python-arango`, `networkx`, `matplotlib`  
+
+## Getting Started
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/telecom-handover-sim.git
+cd telecom-handover-sim
+```
+
+### 2. Configure Environment
+
+Copy and edit the `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Edit variables such as:
+
+```dotenv
+ARANGO_ROOT_PASSWORD=ChangeMe!
+DB_NAME=handover_db
+EVENT_COLLECTION=events
+GRAPH_NAME=handoverGraph
+DATA_INTERVAL=30
+RETENTION_WINDOW=3600
+```
+
+### 3. Build & Run with Docker Compose
+
+```bash
+docker-compose up --build -d
+```
+
+Monitor logs:
+
+```bash
+docker-compose logs -f generator
+docker-compose logs -f cleanup
+```
+
+## Components
+
+### Data Generator
+
+**Location:** `generator/generate.py`  
+Simulates 20 towers, picks random edges every 30 s, appends to `data/handover.xlsx`, and inserts into ArangoDB.
+
+### ArangoDB Setup
+
+Initialized by `init-arango.js`, creates DB, graph, and collections. Data persisted in `./arangodata`.
+
+### Retention Cleanup Script
+
+**Location:** `cleanup/cleanup.py`  
+Scheduled via cron, deletes events older than the retention window.
+
+### Graph Visualization
+
+**Location:** `visualizer/visualize.py`  
+Uses NetworkX to pull the graph and render to PNG or HTML.
+
+## Configuration
+
+Environment variables in `.env`. Override in `docker-compose.override.yml`.
+
+| Variable             | Description                      | Default      |
+|----------------------|----------------------------------|--------------|
+| ARANGO_ROOT_PASSWORD | Admin password for ArangoDB      | ChangeMe!    |
+| DB_NAME              | ArangoDB database name           | handover_db  |
+| EVENT_COLLECTION     | Name of the events collection    | events       |
+| GRAPH_NAME           | Name of the Arango graph         | handoverGraph|
+| DATA_INTERVAL        | Data generation interval (s)     | 30           |
+| RETENTION_WINDOW     | Retention window (s)             | 3600         |
+
+## Usage
+
+1. Start services: `docker-compose up -d`  
+2. Watch generation: `tail -f data/handover.xlsx`  
+3. Inspect DB via arangosh or UI at `http://localhost:8529`.  
+4. Generate visualization:  
+   ```bash
+   python visualizer/visualize.py --output latest_graph.png
+   ```
+
+## Extending the Simulation
+
+- **Add nodes:** edit `generator/config.yml`  
+- **Change interval:** adjust `DATA_INTERVAL`  
+- **Modify retention:** adjust `RETENTION_WINDOW`  
+- **Alternative viz:** integrate Plotly or D3
+
+## Contact
+
+Please feel free to reach out to me at mokshhyadav.024@gmail.com
