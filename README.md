@@ -35,18 +35,13 @@ It generates synthetic data every **30 seconds**, stores the **last 1 hour of ev
 
 ## 🏗️ Architecture
 
-\`\`\`
-┌──────────────────┐       ┌────────────────┐       ┌──────────────────┐
-│ Data Generator   │ ───▶ │   ArangoDB     │ ───▶ │ Cleanup Service  │
-│ (Python Script)  │      │   (Docker)     │      │ (Retention Job)  │
-└──────────────────┘       └────────────────┘       └──────────────────┘
-                                        │
-                                        ▼
-                               ┌──────────────────┐
-                               │ Graph Visualizer │
-                               │ (Python + vis)   │
-                               └──────────────────┘
-\`\`\`
+![Architecture](https://github.com/user-attachments/assets/f62d3faa-5a7a-49ad-9d86-3e616c815e09)
+
+---
+
+## Process Block Diagram 
+
+![Process Block](https://github.com/user-attachments/assets/e60c0502-a256-41b4-8f76-ab6cfdaa6896)
 
 ---
 
@@ -128,6 +123,11 @@ docker-compose logs -f cleanup
 
 - **Location:** \`visualizer/visualize.py\`  
 - Uses \`networkx\` and \`matplotlib\` to render the graph to PNG or HTML
+
+---
+## DashBoard Python 
+
+![Dashboard](https://github.com/user-attachments/assets/bd28b06f-da83-40ad-8d09-398afa6e2ada)
 
 ---
 
